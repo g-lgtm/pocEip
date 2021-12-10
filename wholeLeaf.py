@@ -54,7 +54,7 @@ class branchItem:
                 result.append((id + 1, gInt / 100, yInt / 100))
         return result
 
-champ = branchItem("full.png")
+champ = branchItem("sample.png")
 status = champ.getStats()
 for id, green, yellow in status:
     print("id:", id, "Green:", green, "% yellow", yellow, "%", sep=' ')
