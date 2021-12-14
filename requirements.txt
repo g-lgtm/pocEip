@@ -1,1 +1,3 @@
+dnspython==2.1.0
 Pillow==8.4.0
+pymongo==4.0.1
