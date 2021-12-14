@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-from os import sep
 from PIL import Image
 from tools import getColor
 
@@ -17,12 +16,14 @@ class branchItem:
         block = [()]
         blocks = [[()]]
         nbr = 0
+        bigBool = False
         block.clear()
         blocks.clear()
         for y in range(maxY):
             for x in range(maxX):
                 if getColor(self.pixels[x, y]) == "Green" or getColor(self.pixels[x, y]) == "Yellow":
                     inLock = True
+                    bigBool = True
                     block.append(self.pixels[x, y])
             if inLock:
                 lock = True
@@ -35,6 +36,8 @@ class branchItem:
         length = 0
         result = [(1, 1, 1)]
         result.clear()
+        if len(blocks) == 0 and bigBool:
+            blocks.append(block.copy())
         for id in range(len(blocks)):
             length = len(blocks[id]) + 2
             if length % 2 != 0:
@@ -54,7 +57,7 @@ class branchItem:
                 result.append((id + 1, gInt / 100, yInt / 100))
         return result
 
-champ = branchItem("sample.png")
+champ = branchItem("moreRealSample.jpeg")
 status = champ.getStats()
 for id, green, yellow in status:
     print("id:", id, "Green:", green, "% yellow", yellow, "%", sep=' ')

@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-TARGET_COLORS = {"Red": (255, 0, 0), "Yellow": (255, 255, 0), "Green": (0, 255, 0), "White": (255, 255, 255), "Black": (0, 0, 0)}
+TARGET_COLORS = {"Red": (255, 0, 0), "Yellow": (254, 254, 0), "Green": (0, 254, 0), "White": (255, 255, 255), "Black": (0, 0, 0)}
 
 def color_difference(color1, color2):
     return sum([abs(component1-component2) for component1, component2 in zip(color1, color2)])
