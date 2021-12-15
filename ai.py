@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 from pymongo import MongoClient
-from PIL import Image
+from PIL import Image, ImageFilter
 from tools import getColor
 import argparse
 
@@ -10,6 +10,7 @@ class branchItem:
         self.path = path
         self.image = Image.open(path)
         self.pixels = self.image.load()
+        self.imgs = {}
     
     def createBlocks(self, nbr):
         for i in range(nbr):
@@ -27,22 +28,56 @@ class branchItem:
                             inBlock = True
                             save += 1
                         if save == i:
-                            if getColor(px[x - 1, y]) != "Green" and getColor(px[x - 1, y]) != "Yellow":
+                            if x > 0 and getColor(px[x - 1, y]) != "Green" and getColor(px[x - 1, y]) != "Yellow":
                                 px[x - 1, y] = (0, 0, 0, 0)
-                            if getColor(px[x + 1, y]) != "Green" and getColor(px[x + 1, y]) != "Yellow":
+                            if x < maxX - 1 and getColor(px[x + 1, y]) != "Green" and getColor(px[x + 1, y]) != "Yellow":
                                 px[x + 1, y] = (0, 0, 0, 0)
-                            if getColor(px[x, y - 1]) != "Green" and getColor(px[x, y - 1]) != "Yellow":
+                            if y > 0 and getColor(px[x, y - 1]) != "Green" and getColor(px[x, y - 1]) != "Yellow":
                                 px[x, y - 1] = (0, 0, 0, 0)
-                            if getColor(px[x, y + 1]) != "Green" and getColor(px[x, y + 1]) != "Yellow":
+                            if y < maxY + 1 and getColor(px[x, y + 1]) != "Green" and getColor(px[x, y + 1]) != "Yellow":
                                 px[x, y + 1] = (0, 0, 0, 0)
-                            if getColor(px[x - 1, y - 1]) != "Green" and getColor(px[x - 1, y - 1]) != "Yellow":
+                            if x > 0 and y > 0 and getColor(px[x - 1, y - 1]) != "Green" and getColor(px[x - 1, y - 1]) != "Yellow":
                                 px[x - 1, y - 1] = (0, 0, 0, 0)
-                            if getColor(px[x + 1, y + 1]) != "Green" and getColor(px[x + 1, y + 1]) != "Yellow":
+                            if x < maxX - 1 and y < maxY - 1 and getColor(px[x + 1, y + 1]) != "Green" and getColor(px[x + 1, y + 1]) != "Yellow":
                                 px[x + 1, y + 1] = (0, 0, 0, 0)
-                            if getColor(px[x - 1, y + 1]) != "Green" and getColor(px[x - 1, y + 1]) != "Yellow":
+                            if x > 0 and y < maxY - 1 and getColor(px[x - 1, y + 1]) != "Green" and getColor(px[x - 1, y + 1]) != "Yellow":
                                 px[x - 1, y + 1] = (0, 0, 0, 0)
-                            if getColor(px[x + 1, y - 1]) != "Green" and getColor(px[x + 1, y - 1]) != "Yellow":
+                            if x < maxX - 1 and y > 0 and getColor(px[x + 1, y - 1]) != "Green" and getColor(px[x + 1, y - 1]) != "Yellow":
                                 px[x + 1, y - 1] = (0, 0, 0, 0)
+
+                            if x > 1 and getColor(px[x - 2, y]) != "Green" and getColor(px[x - 2, y]) != "Yellow":
+                                px[x - 2, y] = (0, 0, 0, 0)
+                            if x < maxX - 2 and getColor(px[x + 2, y]) != "Green" and getColor(px[x + 2, y]) != "Yellow":
+                                px[x + 2, y] = (0, 0, 0, 0)
+                            if y > 1 and getColor(px[x, y - 2]) != "Green" and getColor(px[x, y - 2]) != "Yellow":
+                                px[x, y - 2] = (0, 0, 0, 0)
+                            if y < maxY + 2 and getColor(px[x, y + 2]) != "Green" and getColor(px[x, y + 2]) != "Yellow":
+                                px[x, y + 2] = (0, 0, 0, 0)
+                            if x > 1 and y > 1 and getColor(px[x - 2, y - 2]) != "Green" and getColor(px[x - 2, y - 2]) != "Yellow":
+                                px[x - 2, y - 2] = (0, 0, 0, 0)
+                            if x < maxX - 2 and y < maxY - 2 and getColor(px[x + 2, y + 2]) != "Green" and getColor(px[x + 2, y + 2]) != "Yellow":
+                                px[x + 2, y + 2] = (0, 0, 0, 0)
+                            if x > 1 and y < maxY - 2 and getColor(px[x - 2, y + 2]) != "Green" and getColor(px[x - 2, y + 2]) != "Yellow":
+                                px[x - 2, y + 2] = (0, 0, 0, 0)
+                            if x < maxX - 2 and y > 1 and getColor(px[x + 2, y - 2]) != "Green" and getColor(px[x + 2, y - 2]) != "Yellow":
+                                px[x + 2, y - 2] = (0, 0, 0, 0)
+                            
+                            if x > 2 and getColor(px[x - 3, y]) != "Green" and getColor(px[x - 3, y]) != "Yellow":
+                                px[x - 3, y] = (0, 0, 0, 0)
+                            if x < maxX - 3 and getColor(px[x + 3, y]) != "Green" and getColor(px[x + 3, y]) != "Yellow":
+                                px[x + 3, y] = (0, 0, 0, 0)
+                            if y > 2 and getColor(px[x, y - 3]) != "Green" and getColor(px[x, y - 3]) != "Yellow":
+                                px[x, y - 3] = (0, 0, 0, 0)
+                            if y < maxY + 3 and getColor(px[x, y + 3]) != "Green" and getColor(px[x, y + 3]) != "Yellow":
+                                px[x, y + 3] = (0, 0, 0, 0)
+                            if x > 2 and y > 2 and getColor(px[x - 3, y - 3]) != "Green" and getColor(px[x - 3, y - 3]) != "Yellow":
+                                px[x - 3, y - 3] = (0, 0, 0, 0)
+                            if x < maxX - 3 and y < maxY - 3 and getColor(px[x + 3, y + 3]) != "Green" and getColor(px[x + 3, y + 3]) != "Yellow":
+                                px[x + 3, y + 3] = (0, 0, 0, 0)
+                            if x > 2 and y < maxY - 3 and getColor(px[x - 3, y + 3]) != "Green" and getColor(px[x - 3, y + 3]) != "Yellow":
+                                px[x - 3, y + 3] = (0, 0, 0, 0)
+                            if x < maxX - 3 and y > 2 and getColor(px[x + 3, y - 3]) != "Green" and getColor(px[x + 3, y - 3]) != "Yellow":
+                                px[x + 3, y - 3] = (0, 0, 0, 0)
                 if not(lock):
                     inBlock = False
                 lock = False
@@ -50,7 +85,7 @@ class branchItem:
                 for x in range(maxX):
                     if px[x, y] == (0, 0, 0, 0):
                         px[x, y] = (255, 0, 0, 255)
-            img.save("Part" + str(i + 1) + ".png")
+            self.imgs["Part" + str(i + 1) + ".png"] = img.copy()
     
     def getStats(self):
         x, y = 0, 0
@@ -101,7 +136,8 @@ class branchItem:
                 yInt = int(YCount * 100 / totalSize * 100)
                 if gInt + yInt < 10000:
                     yInt = yInt + (10000 - (gInt + yInt))
-                im = Image.open("Part" + str(id + 1) + ".png")
+                # im = Image.open("Part" + str(id + 1) + ".png")
+                im = self.imgs["Part" + str(id + 1) + ".png"]
                 result.append((names[id], id + 1, gInt / 100, yInt / 100, im.tobytes(), im.size))
         return result
 
@@ -158,12 +194,15 @@ def testmain(args):
         filepath = args.upload
     # link = "mongodb+srv://Flylens:Eip2024@cluster0.ffuat.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
     data = loadData(filepath)
+    if args.none:
+        return
     if args.reset:
         uploadData(link, data, True)
     uploadData(link, data)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("-n", "--none", action="store_true")
     parser.add_argument("-l", "--dbLink", type=str, help="the database link default is \"mongodb+srv://Flylens:Eip2024@cluster0.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority\"")
     parser.add_argument("-p", "--password", action="store_true", help="this option is if the password isn't in the sdLink (a read(0) will be provided)")
     parser.add_argument("-u", "--upload", type=str, help="load and upload data from the filepath of a picture")
