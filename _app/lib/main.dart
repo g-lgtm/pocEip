@@ -169,7 +169,6 @@ class _dbfuture extends State<dbfuture> {
                 child: Text('Result: ${snapshot.data}',
                   style: TextStyle(height: 5, fontSize: 10),
                 ),
-                ),
               )
             ];
           } else if (snapshot.hasError) {                       // error
