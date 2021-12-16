@@ -7,15 +7,28 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:camera/camera.dart';
 import 'camera.dart';
-import 'mongo.dart';
+
+import 'package:mongo_dart/mongo_dart.dart' as dart_mongo;
+
+late final CameraDescription camera_f;
 
 Future<void> main() async {
+  // Ensure that plugin services are initialized so that availableCameras()
+  // can be called before runApp()
   WidgetsFlutterBinding.ensureInitialized();
-  cameras = await availableCameras();
-  runApp(MyApp());
+
+  // Obtain a list of the available cameras on the device.
+  final cameras = await availableCameras();
+
+  // Get a specific camera from the list of available cameras.
+  camera_f = cameras.first;
+
+  runApp(
+    MyApp(),
+  );
 }
 
-/// This is the main application widget.
+
 class MyApp extends StatelessWidget {
 
   static const String _title = 'Flutter Code Sample';
@@ -78,6 +91,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
           )
         ),
         bottom: TabBar(
+          indicatorColor: Colors.white,
           controller: _tabController,
           tabs: const <Widget>[
             Tab(
@@ -99,7 +113,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
             child: DashBoard(),
           ),
           Center(
-            child: CameraApp(),
+            child: TakePictureScreen(camera: camera_f),
           ),
           Center(
             child: dbfuture(),
@@ -110,10 +124,18 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   }
 }
 
-
 Widget foo = new GestureDetector(
-    onTap: () {
-        print("...");
+    onTap: () async {
+        dart_mongo.Db db = dart_mongo.Db("mongodb://localhost:27017/test");
+
+        await db.open();
+
+        print("connected to mongodb");
+
+        dart_mongo.DbCollection collection = db.collection('images');
+
+        var data = await collection.find(dart_mongo.where.limit(5)).toList();
+        print(data);
     },
     child: new Container(
         height: 40,
@@ -124,7 +146,7 @@ Widget foo = new GestureDetector(
         // ),
         child: Center(
             child: Text(
-                '...',
+                'goToDb',
                 style: TextStyle(
                     color: Colors.blue,
                     fontWeight: FontWeight.bold,
@@ -145,7 +167,7 @@ class dbfuture extends StatefulWidget {
 class _dbfuture extends State<dbfuture> {
   final Future<String> _calculation = Future<String>.delayed(
     const Duration(seconds: 2),
-    () => 'Data Loaded',
+    () => 'db connected',
   );
 
   @override
@@ -157,7 +179,7 @@ class _dbfuture extends State<dbfuture> {
         future: _calculation, // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           List<Widget> children;
-          if (snapshot.hasData) {                               // loaded
+          if (snapshot.hasData) {                              // loaded
             children = <Widget>[
               const Icon(
                 Icons.check_circle_outline,
