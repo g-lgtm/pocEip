@@ -1,9 +1,22 @@
 #! /usr/bin/env python3
 
 from pymongo import MongoClient
-from PIL import Image, ImageFilter
+from PIL import Image
 from tools import getColor
-import argparse
+import signal
+from time import sleep, ctime
+import time
+
+def signal_handler(sig, frame):
+    print()
+    print("LEAVING", end='', flush=True)
+    sleep(0.2)
+    print(".", end='', flush=True)
+    sleep(0.8)
+    print(".", end='', flush=True)
+    sleep(0.8)
+    print(".", flush=True)
+    exit()
 
 class branchItem:
     def __init__(self, path):
@@ -136,7 +149,6 @@ class branchItem:
                 yInt = int(YCount * 100 / totalSize * 100)
                 if gInt + yInt < 10000:
                     yInt = yInt + (10000 - (gInt + yInt))
-                # im = Image.open("Part" + str(id + 1) + ".png")
                 im = self.imgs["Part" + str(id + 1) + ".png"]
                 result.append((names[id], id + 1, gInt / 100, yInt / 100, im.tobytes(), im.size))
         return result
@@ -179,32 +191,35 @@ def uploadData(link, data, reset=False):
         collection.delete_one({"name":res["name"]})
         collection.insert_one(res)
 
-def testmain(args):
-    link = "mongodb+srv://Flylens:Eip2024@cluster0.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
-    filepath = "sample.png"
-    if args.dbLink:
-        link = args.dbLink
-    if args.password:
-        password = input("Type in the database password: ")
-        toFind = "<password>"
-        save = link.find(toFind)
-        link = link[0:save] + password + link[save + len(toFind):len(link)]
-        # mongodb+srv://Flylens:<password>@cluster0.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
-    if args.upload:
-        filepath = args.upload
-    # link = "mongodb+srv://Flylens:Eip2024@cluster0.ffuat.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
-    data = loadData(filepath)
-    if args.none:
-        return
-    if args.reset:
-        uploadData(link, data, True)
-    uploadData(link, data)
+def getNewInfo():
+    client = MongoClient("mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+    db = client.AnalyseField
+    collection = db.raws
+    asNew = collection.find()
+    for doc in asNew:
+        collection.delete_one({"name": doc["name"]})
+        return doc
+    return None
+
+def pushNewInfo(info):
+    if info["name"] == "allc":
+        Image.frombytes("RGBA", (info["sizex"], info["sizey"]), info["png"]).save(".__aicache__.png")
+        uploadData("mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", loadData(".__aicache__.png"))
+    return
+
+def main(every):
+    while True:
+        newInfo = getNewInfo()
+        if newInfo:
+            print("Got data at:", end=' ')
+            print(ctime())
+            pushNewInfo(newInfo)
+            print("data pushed at:", end=' ')
+            print(ctime())
+        else:
+            print("waiting")
+        sleep(every)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--none", action="store_true")
-    parser.add_argument("-l", "--dbLink", type=str, help="the database link default is \"mongodb+srv://Flylens:Eip2024@cluster0.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority\"")
-    parser.add_argument("-p", "--password", action="store_true", help="this option is if the password isn't in the sdLink (a read(0) will be provided)")
-    parser.add_argument("-u", "--upload", type=str, help="load and upload data from the filepath of a picture")
-    parser.add_argument("-r", "--reset", action="store_true", help="this option make a big clean of the collection before the push of the new informations")
-    testmain(parser.parse_args())
+    signal.signal(signal.SIGINT, signal_handler)
+    main(3600 / 2)
