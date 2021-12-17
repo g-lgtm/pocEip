@@ -25,81 +25,76 @@ class branchItem:
         self.pixels = self.image.load()
         self.imgs = {}
     
-    def createBlocks(self, nbr):
-        for i in range(nbr):
-            img = Image.open(self.path)
-            px = img.load()
-            maxX, maxY = img.size
+    def createBlocks(self):
+        maxX, maxY = self.image.size
+        lock = False
+        inBlock = False
+        fEnd = True
+        block = [()]
+        blocks = [[()]]
+        block.clear()
+        blocks.clear()
+        savex, savey, saveminx, saveminy = 0, 0, 0, 0
+        maxmins = [()]
+        maxmins.clear()
+        first = True
+        for y in range(maxY):
+            for x in range(maxX):
+                if getColor(self.pixels[x, y]) == "Green" or getColor(self.pixels[x, y]) == "Yellow":
+                    lock = True
+                    fEnd = True
+                    if not(inBlock):
+                        if first:
+                            first = False
+                        else:
+                            blocks.append(block.copy())
+                            block.clear()
+                            maxmins.append((savex - (saveminx - 1), savey - (saveminy - 1), saveminx, saveminy))
+                        savex, savey, saveminx, saveminy = 0, 0, x, y
+                        inBlock = True
+                    block.append((x, self.pixels[x, y]))
+                    if x > savex:
+                        savex = x
+                    elif x < saveminx:
+                        saveminx = x
+                    if y > savey:
+                        savey = y
+                    elif y < saveminy:
+                        saveminy = y
+                elif inBlock and lock and fEnd:
+                    fEnd = False
+                    block.append((0, (-1, -1, -1, -1)))
+            if not(lock):
+                inBlock = False
+            elif block[len(block) - 1] != (0, (-1, -1, -1, -1)):
+                block.append((0, (-1, -1, -1, -1)))
             lock = False
-            inBlock = False
-            save = -1
-            for y in range(maxY):
-                for x in range(maxX):
-                    if getColor(px[x, y]) == "Green" or getColor(px[x, y]) == "Yellow":
-                        lock = True
-                        if not(inBlock):
-                            inBlock = True
-                            save += 1
-                        if save == i:
-                            if x > 0 and getColor(px[x - 1, y]) != "Green" and getColor(px[x - 1, y]) != "Yellow":
-                                px[x - 1, y] = (0, 0, 0, 0)
-                            if x < maxX - 1 and getColor(px[x + 1, y]) != "Green" and getColor(px[x + 1, y]) != "Yellow":
-                                px[x + 1, y] = (0, 0, 0, 0)
-                            if y > 0 and getColor(px[x, y - 1]) != "Green" and getColor(px[x, y - 1]) != "Yellow":
-                                px[x, y - 1] = (0, 0, 0, 0)
-                            if y < maxY + 1 and getColor(px[x, y + 1]) != "Green" and getColor(px[x, y + 1]) != "Yellow":
-                                px[x, y + 1] = (0, 0, 0, 0)
-                            if x > 0 and y > 0 and getColor(px[x - 1, y - 1]) != "Green" and getColor(px[x - 1, y - 1]) != "Yellow":
-                                px[x - 1, y - 1] = (0, 0, 0, 0)
-                            if x < maxX - 1 and y < maxY - 1 and getColor(px[x + 1, y + 1]) != "Green" and getColor(px[x + 1, y + 1]) != "Yellow":
-                                px[x + 1, y + 1] = (0, 0, 0, 0)
-                            if x > 0 and y < maxY - 1 and getColor(px[x - 1, y + 1]) != "Green" and getColor(px[x - 1, y + 1]) != "Yellow":
-                                px[x - 1, y + 1] = (0, 0, 0, 0)
-                            if x < maxX - 1 and y > 0 and getColor(px[x + 1, y - 1]) != "Green" and getColor(px[x + 1, y - 1]) != "Yellow":
-                                px[x + 1, y - 1] = (0, 0, 0, 0)
-
-                            if x > 1 and getColor(px[x - 2, y]) != "Green" and getColor(px[x - 2, y]) != "Yellow":
-                                px[x - 2, y] = (0, 0, 0, 0)
-                            if x < maxX - 2 and getColor(px[x + 2, y]) != "Green" and getColor(px[x + 2, y]) != "Yellow":
-                                px[x + 2, y] = (0, 0, 0, 0)
-                            if y > 1 and getColor(px[x, y - 2]) != "Green" and getColor(px[x, y - 2]) != "Yellow":
-                                px[x, y - 2] = (0, 0, 0, 0)
-                            if y < maxY + 2 and getColor(px[x, y + 2]) != "Green" and getColor(px[x, y + 2]) != "Yellow":
-                                px[x, y + 2] = (0, 0, 0, 0)
-                            if x > 1 and y > 1 and getColor(px[x - 2, y - 2]) != "Green" and getColor(px[x - 2, y - 2]) != "Yellow":
-                                px[x - 2, y - 2] = (0, 0, 0, 0)
-                            if x < maxX - 2 and y < maxY - 2 and getColor(px[x + 2, y + 2]) != "Green" and getColor(px[x + 2, y + 2]) != "Yellow":
-                                px[x + 2, y + 2] = (0, 0, 0, 0)
-                            if x > 1 and y < maxY - 2 and getColor(px[x - 2, y + 2]) != "Green" and getColor(px[x - 2, y + 2]) != "Yellow":
-                                px[x - 2, y + 2] = (0, 0, 0, 0)
-                            if x < maxX - 2 and y > 1 and getColor(px[x + 2, y - 2]) != "Green" and getColor(px[x + 2, y - 2]) != "Yellow":
-                                px[x + 2, y - 2] = (0, 0, 0, 0)
-                            
-                            if x > 2 and getColor(px[x - 3, y]) != "Green" and getColor(px[x - 3, y]) != "Yellow":
-                                px[x - 3, y] = (0, 0, 0, 0)
-                            if x < maxX - 3 and getColor(px[x + 3, y]) != "Green" and getColor(px[x + 3, y]) != "Yellow":
-                                px[x + 3, y] = (0, 0, 0, 0)
-                            if y > 2 and getColor(px[x, y - 3]) != "Green" and getColor(px[x, y - 3]) != "Yellow":
-                                px[x, y - 3] = (0, 0, 0, 0)
-                            if y < maxY + 3 and getColor(px[x, y + 3]) != "Green" and getColor(px[x, y + 3]) != "Yellow":
-                                px[x, y + 3] = (0, 0, 0, 0)
-                            if x > 2 and y > 2 and getColor(px[x - 3, y - 3]) != "Green" and getColor(px[x - 3, y - 3]) != "Yellow":
-                                px[x - 3, y - 3] = (0, 0, 0, 0)
-                            if x < maxX - 3 and y < maxY - 3 and getColor(px[x + 3, y + 3]) != "Green" and getColor(px[x + 3, y + 3]) != "Yellow":
-                                px[x + 3, y + 3] = (0, 0, 0, 0)
-                            if x > 2 and y < maxY - 3 and getColor(px[x - 3, y + 3]) != "Green" and getColor(px[x - 3, y + 3]) != "Yellow":
-                                px[x - 3, y + 3] = (0, 0, 0, 0)
-                            if x < maxX - 3 and y > 2 and getColor(px[x + 3, y - 3]) != "Green" and getColor(px[x + 3, y - 3]) != "Yellow":
-                                px[x + 3, y - 3] = (0, 0, 0, 0)
-                if not(lock):
-                    inBlock = False
-                lock = False
-            for y in range(maxY):
-                for x in range(maxX):
-                    if px[x, y] == (0, 0, 0, 0):
-                        px[x, y] = (255, 0, 0, 255)
+        blocks.append(block.copy())
+        maxmins.append((savex - (saveminx - 1), savey - (saveminy - 1), saveminx, saveminy))
+        for i in range(len(blocks)):
+            x, y, minx, miny = maxmins[i]
+            img = Image.new('RGBA', (x + 1, y + 1), (0, 0, 0, 0))
+            tmppix = img.load()
+            tmpx, tmpy = 0, 0
+            tmpblock = blocks[i]
+            rank = 0
+            savedX, col = tmpblock[rank]
+            tmpx = savedX - minx
+            while rank < len(tmpblock):
+                savedX, col = tmpblock[rank]
+                if col == (-1, -1, -1, -1):
+                    rank += 1
+                    if rank >= len(tmpblock):
+                        break
+                    savedX, col = tmpblock[rank]
+                    tmpx = savedX - minx
+                    tmpy += 1
+                else:
+                    tmpx += 1
+                tmppix[tmpx, tmpy] = col
+                rank += 1
             self.imgs["Part" + str(i + 1) + ".png"] = img.copy()
-    
+
     def getStats(self):
         x, y = 0, 0
         maxX, maxY = self.image.size
@@ -132,7 +127,7 @@ class branchItem:
         if len(blocks) == 0 and bigBool:
             blocks.append(block.copy())
             nbr += 1
-        self.createBlocks(len(blocks))
+        self.createBlocks()
         for id in range(len(blocks)):
             length = len(blocks[id]) + 2
             if length % 2 != 0:
@@ -191,9 +186,7 @@ def uploadData(link, data, reset=False):
         collection.delete_one({"name":res["name"]})
         collection.insert_one(res)
 
-def getNewInfo():
-    client = MongoClient("mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
-    db = client.AnalyseField
+def getNewInfo(db):
     collection = db.raws
     asNew = collection.find()
     for doc in asNew:
@@ -208,16 +201,16 @@ def pushNewInfo(info):
     return
 
 def main(every):
+    client = MongoClient("mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+    db = client.AnalyseField
     while True:
-        newInfo = getNewInfo()
+        newInfo = getNewInfo(db)
         if newInfo:
             print("Got data at:", end=' ')
             print(ctime())
             pushNewInfo(newInfo)
             print("data pushed at:", end=' ')
             print(ctime())
-        else:
-            print("waiting")
         sleep(every)
 
 if __name__ == "__main__":
