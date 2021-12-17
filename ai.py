@@ -5,7 +5,6 @@ from PIL import Image
 from tools import getColor
 import signal
 from time import sleep, ctime
-import time
 
 def signal_handler(sig, frame):
     print()
