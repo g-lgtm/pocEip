@@ -72,7 +72,7 @@ class branchItem:
         maxmins.append((savex - (saveminx - 1), savey - (saveminy - 1), saveminx, saveminy))
         for i in range(len(blocks)):
             x, y, minx, miny = maxmins[i]
-            img = Image.new('RGBA', (x + 1, y + 1), (0, 0, 0, 0))
+            img = Image.new('RGBA', (x, y), (0, 0, 0, 0))
             tmppix = img.load()
             tmpx, tmpy = 0, 0
             tmpblock = blocks[i]
@@ -90,7 +90,8 @@ class branchItem:
                     tmpy += 1
                 else:
                     tmpx += 1
-                tmppix[tmpx, tmpy] = col
+                if not(tmpx >= x or tmpy >= y):
+                    tmppix[tmpx, tmpy] = col
                 rank += 1
             self.imgs["Part" + str(i + 1) + ".png"] = img.copy()
 
@@ -193,11 +194,32 @@ def getNewInfo(db):
         return doc
     return None
 
+def manualData(link, name, data):
+    other, lst = data
+    client = MongoClient(link)
+    db = client.AnalyseField
+    collection = db.fields
+    rank = 1
+    for elem in lst:
+        elem["name"] = name + "Part" + str(rank)
+        collection.delete_one({"name": elem["name"]})
+        collection.insert_one(elem)
+        rank += 1
+    if rank > 2:
+        path, g, y = other
+        im = Image.open(path)
+        x, y = im.size
+        collection.delete_one({"name": name + "Part0"})
+        collection.insert_one({"name": name + "Part0", "green": str(g), "yellow": str(y), "png": im.tobytes(), "sizex": x, "sizey": y})
+
 def pushNewInfo(info):
+    link = "mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+    pngCache = ".__aicache__.png"
+    Image.frombytes("RGBA", (info["sizex"], info["sizey"]), info["png"]).save(".__aicache__.png")
     if info["name"] == "allc":
-        Image.frombytes("RGBA", (info["sizex"], info["sizey"]), info["png"]).save(".__aicache__.png")
-        uploadData("mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", loadData(".__aicache__.png"))
-    return
+        uploadData(link, loadData(pngCache))
+    else:
+        manualData(link, info["name"], loadData(pngCache))
 
 def main(every):
     client = MongoClient("mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
