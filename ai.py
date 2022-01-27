@@ -23,7 +23,7 @@ class branchItem:
         self.image = Image.open(path)
         self.pixels = self.image.load()
         self.imgs = {}
-    
+
     def createBlocks(self):
         maxX, maxY = self.image.size
         lock = False
@@ -62,17 +62,17 @@ class branchItem:
                         saveminy = y
                 elif inBlock and lock and fEnd:
                     fEnd = False
-                    block.append((0, (-1, -1, -1, -1)))
+                    block.append((0, (-1, -1, -1)))
             if not(lock):
                 inBlock = False
-            elif block[len(block) - 1] != (0, (-1, -1, -1, -1)):
-                block.append((0, (-1, -1, -1, -1)))
+            elif block[len(block) - 1] != (0, (-1, -1, -1)):
+                block.append((0, (-1, -1, -1)))
             lock = False
         blocks.append(block.copy())
         maxmins.append((savex - (saveminx - 1), savey - (saveminy - 1), saveminx, saveminy))
         for i in range(len(blocks)):
             x, y, minx, miny = maxmins[i]
-            img = Image.new('RGBA', (x, y), (0, 0, 0, 0))
+            img = Image.new('RGB', (x, y), (0, 0, 0))
             tmppix = img.load()
             tmpx, tmpy = 0, 0
             tmpblock = blocks[i]
@@ -81,7 +81,7 @@ class branchItem:
             tmpx = savedX - minx
             while rank < len(tmpblock):
                 savedX, col = tmpblock[rank]
-                if col == (-1, -1, -1, -1):
+                if col == (-1, -1, -1):
                     rank += 1
                     if rank >= len(tmpblock):
                         break
@@ -96,56 +96,78 @@ class branchItem:
             self.imgs["Part" + str(i + 1) + ".png"] = img.copy()
 
     def getStats(self):
-        x, y = 0, 0
-        maxX, maxY = self.image.size
-        lock, inLock = False, False
-        block = [()]
-        blocks = [[()]]
-        nbr = 0
-        bigBool = False
-        block.clear()
-        blocks.clear()
-        names = []
-        for y in range(maxY):
-            for x in range(maxX):
-                if getColor(self.pixels[x, y]) == "Green" or getColor(self.pixels[x, y]) == "Yellow":
-                    inLock = True
-                    bigBool = True
-                    block.append(self.pixels[x, y])
-            if inLock:
-                lock = True
-            elif lock:
-                lock = False
-                blocks.append(block.copy())
-                block.clear()
-                nbr += 1
-                names.append("Part" + str(nbr))
-            inLock = False
-        length = 0
+        # x, y = 0, 0
+        # maxX, maxY = self.image.size
+        # lock, inLock = False, False
+        # block = [()]
+        # blocks = [[()]]
+        # nbr = 0
+        # bigBool = False
+        # block.clear()
+        # blocks.clear()
+        # names = []
+        # for y in range(maxY):
+        #     for x in range(maxX):
+        #         if getColor(self.pixels[x, y]) == "Green" or getColor(self.pixels[x, y]) == "Yellow":
+        #             inLock = True
+        #             bigBool = True
+        #             block.append(self.pixels[x, y])
+        #     if inLock:
+        #         lock = True
+        #     elif lock:
+        #         lock = False
+        #         blocks.append(block.copy())
+        #         block.clear()
+        #         nbr += 1
+        #         names.append("Part" + str(nbr))
+        #     inLock = False
+        # length = 0
         result = [("", 1, 1, 1)]
         result.clear()
-        if len(blocks) == 0 and bigBool:
-            blocks.append(block.copy())
-            nbr += 1
+        rank = 0
         self.createBlocks()
-        for id in range(len(blocks)):
-            length = len(blocks[id]) + 2
-            if length % 2 != 0:
-                length += 1
-            GCount, YCount = 0, 0
-            for blk in blocks[id]:
-                if getColor(blk) == "Green":
-                    GCount += 1
-                elif getColor(blk) == "Yellow":
-                    YCount += 1
-            totalSize = GCount + YCount
-            if totalSize != 0:
-                gInt = int(GCount * 100 / totalSize * 100)
-                yInt = int(YCount * 100 / totalSize * 100)
-                if gInt + yInt < 10000:
-                    yInt = yInt + (10000 - (gInt + yInt))
-                im = self.imgs["Part" + str(id + 1) + ".png"]
-                result.append((names[id], id + 1, gInt / 100, yInt / 100, im.tobytes(), im.size))
+        for name in self.imgs:
+            rank += 1
+            px = self.imgs[name].load()
+            maxX, maxY = self.imgs[name].size
+            Green, Yellow = 0, 0
+            for y in range(maxY):
+                for x in range(maxX):
+                    if getColor(px[x, y]) == "Green":
+                        Green += 1
+                    elif getColor(px[x, y]) == "Yellow":
+                        Yellow += 1
+            total = Green + Yellow
+            if total:
+                Green = int(Green * 100 / total * 100)
+                Yellow = int(Yellow * 100 / total * 100)
+                if Green + Yellow < 10000:
+                    Yellow = int(Yellow + (10000 - (Green + Yellow)))
+                Green /= 100
+                Yellow /= 100
+            result.append((name, rank, Green, Yellow, self.imgs[name].tobytes(), self.imgs[name].size))
+        # if len(blocks) == 0 and bigBool:
+        #     blocks.append(block.copy())
+        #     nbr += 1
+        # self.createBlocks()
+        # for id in range(len(blocks)):
+        #     length = len(blocks[id]) + 2
+        #     if length % 2 != 0:
+        #         length += 1
+        #     GCount, YCount = 0, 0
+        #     for blk in blocks[id]:
+        #         if getColor(blk) == "Green":
+        #             GCount += 1
+        #         elif getColor(blk) == "Yellow":
+        #             YCount += 1
+        #     totalSize = GCount + YCount
+        #     if totalSize != 0:
+        #         gInt = int(GCount * 100 / totalSize * 100)
+        #         yInt = int(YCount * 100 / totalSize * 100)
+        #         if gInt + yInt < 10000:
+        #             yInt = yInt + (10000 - (gInt + yInt))
+        #         im = self.imgs["Part" + str(id + 1) + ".png"]
+        #         result.append((names[id], id + 1, gInt / 100, yInt / 100, im.tobytes(), im.size))
         return result
 
 def loadData(filepath):
@@ -171,7 +193,7 @@ def loadData(filepath):
 
 def uploadData(link, data, reset=False):
     client = MongoClient(link)
-    db = client.AnalyseField
+    db = client.Flylens
     collection = db.fields
     other, stats = data
     filePath, gMoy, yMoy = other
@@ -197,7 +219,7 @@ def getNewInfo(db):
 def manualData(link, name, data):
     other, lst = data
     client = MongoClient(link)
-    db = client.AnalyseField
+    db = client.Flylens
     collection = db.fields
     rank = 1
     for elem in lst:
@@ -206,16 +228,17 @@ def manualData(link, name, data):
         collection.insert_one(elem)
         rank += 1
     if rank > 2:
-        path, g, y = other
+        path, green, yellow = other
         im = Image.open(path)
         x, y = im.size
         collection.delete_one({"name": name + "Part0"})
-        collection.insert_one({"name": name + "Part0", "green": str(g), "yellow": str(y), "png": im.tobytes(), "sizex": x, "sizey": y})
+        collection.insert_one({"name": name + "Part0", "green": str(green), "yellow": str(yellow), "png": im.tobytes(), "sizex": x, "sizey": y})
 
 def pushNewInfo(info):
-    link = "mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+    link = "mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/test"
     pngCache = ".__aicache__.png"
-    Image.frombytes("RGBA", (info["sizex"], info["sizey"]), info["png"]).save(".__aicache__.png")
+    Image.frombytes("RGB", (info["sizex"], info["sizey"]), info["png"]).save(".__aicache__.png")
+
     if info["name"] == "allc":
         uploadData(link, loadData(pngCache))
     else:
@@ -223,7 +246,7 @@ def pushNewInfo(info):
 
 def main(every):
     client = MongoClient("mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
-    db = client.AnalyseField
+    db = client.Flylens
     while True:
         newInfo = getNewInfo(db)
         if newInfo:
@@ -232,8 +255,10 @@ def main(every):
             pushNewInfo(newInfo)
             print("data pushed at:", end=' ')
             print(ctime())
+            newInfo = None
         sleep(every)
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
-    main(3600 / 2)
+    main(10)
+    # main(3600 / 2)
