@@ -258,7 +258,15 @@ def main(every):
             newInfo = None
         sleep(every)
 
+def tmp():
+    data = loadData("./sample.png")
+    one, two = data
+    for i in two:
+        Image.frombytes("RGB", (i["sizex"], i["sizey"]), i["png"]).save(i["name"])
+        print(i["name"], i["green"], i["yellow"])
+
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
-    main(10)
+    tmp()
+    # main(10)
     # main(3600 / 2)
