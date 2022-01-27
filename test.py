@@ -1,10 +1,12 @@
 #! /usr/bin/env python3
 
+# from script import sendRawData as send
+
+# send("./moreRealSample.png", "imageTest")
+
+from PIL import Image
+
 from script import sendRawData as send
-
-send("./moreRealSample.png", "imageTest")
-
-# from PIL import Image
 
 # from tools import getColor
 # class blockGesture:
@@ -90,20 +92,24 @@ send("./moreRealSample.png", "imageTest")
 
 # blockGesture("./sample.png").getSt()
 
-# from pymongo import MongoClient
-# client = MongoClient("mongodb+srv://Flylens:Eip2024@poc.1v9gy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
-# db = client.AnalyseField
+from pymongo import MongoClient
+client = MongoClient("mongodb+srv://test:eip123@cluster0.umd1k.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+db = client.FlyLens
 
 # collection = db.fields
+# rank = 0
 # for two in collection.find():
 #     print ("name: ", two["name"], " green: ", two["green"], "% yellow: ", two["yellow"], " sizeX: ", two["sizex"], " sizeY: ", two["sizey"], sep='')
 #     sizeX, sizeY = two["sizex"], two["sizey"]
 #     Image.frombytes("RGBA", (sizeX, sizeY), two["png"]).show()
+#     rank += 1
 
-# push = db.raws
-# toPush = {}
-# toPush["name"] = "allc"
-# im = Image.open("./sample.png")
-# toPush["sizex"], toPush["sizey"] = im.size
-# toPush["png"] = im.tobytes()
-# push.insert_one(toPush)
+push = db.raws
+toPush = {}
+toPush["name"] = "allc"
+im = Image.open("./sample.png")
+toPush["sizex"], toPush["sizey"] = im.size
+toPush["png"] = im.tobytes()
+push.insert_one(toPush)
+
+# send("./sample.png")
