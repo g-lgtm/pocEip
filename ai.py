@@ -145,6 +145,7 @@ class branchItem:
                     Yellow = int(Yellow + (10000 - (Green + Yellow)))
                 Green /= 100
                 Yellow /= 100
+            Image.new
             result.append((name, rank, Green, Yellow, self.imgs[name].tobytes(), self.imgs[name].size))
         # if len(blocks) == 0 and bigBool:
         #     blocks.append(block.copy())
@@ -258,12 +259,20 @@ def main(every):
             newInfo = None
         sleep(every)
 
+import base64
+
 def tmp():
     data = loadData("./sample.png")
+    client = MongoClient("mongodb+srv://test:eip123@cluster0.umd1k.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+    db = client.FlyLens
+    collection = db.fields
     one, two = data
     for i in two:
         Image.frombytes("RGB", (i["sizex"], i["sizey"]), i["png"]).save(i["name"])
-        print(i["name"], i["green"], i["yellow"])
+        collection.delete_one({"name": i["name"]})
+        with open(i["name"], "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+            collection.insert_one({"name": i["name"], "green": i["green"], "yellow": i["yellow"], "png": encoded_string.decode("utf-8"), "sizex": i["sizex"], "sizey": i["sizey"]})
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
